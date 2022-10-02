@@ -1,12 +1,14 @@
 import os
 from werkzeug.utils import secure_filename
-from flask import Flask, jsonify, send_from_directory, request, redirect, url_for
+from flask import Flask, jsonify, send_from_directory, request, redirect, url_for, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
 app.config.from_object("project.config.Config")
 db = SQLAlchemy(app)
+app.secret_key = 'thisisatest'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 class User(db.Model):
@@ -20,9 +22,10 @@ class User(db.Model):
         self.email = email
 
 
-@app.route("/")
-def hello_world():
-    return jsonify(hello="world")
+@app.route('/', endpoint='home')
+def portfolio():
+    images = os.listdir(os.path.join(app.static_folder, "images"))
+    return render_template('home.html', images=images)
 
 
 @app.route("/static/<path:filename>")
@@ -30,21 +33,28 @@ def staticfiles(filename):
     return send_from_directory(app.config["STATIC_FOLDER"], filename)
 
 
-@app.route("/media/<path:filename>")
-def mediafiles(filename):
-    return send_from_directory(app.config["MEDIA_FOLDER"], filename)
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route("/upload", methods=["GET", "POST"])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
-    if request.method == "POST":
-        file = request.files["file"]
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["MEDIA_FOLDER"], filename))
-    return """
-    <!doctype html>
-    <title>upload new File</title>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file><input type=submit value=Upload>
-    </form>
-    """
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('Oh noes! No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('Oh noes! You need to pick a file to upload')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            images_dir = f"{app.config['STATIC_FOLDER']}/images"
+            file.save(os.path.join(images_dir, filename))
+            # return render_template('picture.html', filename=filename)
+            return redirect(url_for('home'))
+    return render_template('upload.html')

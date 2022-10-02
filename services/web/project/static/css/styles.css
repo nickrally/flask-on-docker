@@ -1,0 +1,21 @@
+.btn-primary {
+    background-color: #7d3b3b !important;
+    border-color: #7d3b3b !important;
+    color: pink !important;
+  }
+  
+  .btn-primary:hover, .btn-primary:active {
+    background-color: #702f2f !important;
+    border-color: #702f2f !important;
+    color: lightblue !important;
+  }
+
+  img{
+    margin: 1rem;
+  }
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3rem;
+  }
