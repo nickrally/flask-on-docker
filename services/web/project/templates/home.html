@@ -1,0 +1,11 @@
+
+{% extends 'layout.html' %}
+{% block body %}
+<section class="row content">
+    {% for image in images %}
+      <section >
+        <a href="{{ url_for('static', filename='images/' + image) }}"><img src="{{ url_for('static', filename='images/' + image) }}" height="200"></a>
+      </section>
+    {% endfor %}
+  </section>
+  {% endblock %}
