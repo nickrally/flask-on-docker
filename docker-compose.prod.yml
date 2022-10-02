@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   web:
+    image: nickrally/web:latest
     build: 
       context: ./services/web
       dockerfile: Dockerfile.prod
@@ -22,6 +23,7 @@ services:
       - ./.env.prod.db
   nginx:
     build: ./services/nginx
+    image: nickrally/nginx:latest
     volumes:
       - static_volume:/home/app/web/project/static
     ports:
